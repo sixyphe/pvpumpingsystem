@@ -7,6 +7,7 @@ import pytest
 import numpy as np
 import os
 import inspect
+import warnings
 
 import pvpumpingsystem.pump as pp
 import pvpumpingsystem.mppt as mppt
@@ -114,7 +115,7 @@ def test_calc_flow_mppt(pvps_set_up):
 def test_calc_flow_direct(pvps_set_up):
     """Test the computing of flows when pump and pv are directly coupled.
     """
-    np.warnings.filterwarnings('ignore', category=RuntimeWarning)
+    warnings.filterwarnings('ignore', category=RuntimeWarning)
     pvps_set_up.coupling = 'direct'
     pvps_set_up.calc_flow(friction=True, atol=0.1, stop=24)
     Q = pvps_set_up.flow.Qlpm.values
