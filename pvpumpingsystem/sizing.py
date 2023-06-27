@@ -42,8 +42,9 @@ def shrink_weather_representative(weather_data, nb_elt=48):
 
     # Get rows with minimum and maximum air temperature
     extreme_temp_df = sub_df[sub_df.temp_air == sub_df.temp_air.max()]
-    extreme_temp_df = extreme_temp_df.append(
-        sub_df[sub_df.temp_air == sub_df.temp_air.min()])
+    extreme_temp_df = pd.concat([extreme_temp_df,
+                                 sub_df[sub_df.temp_air ==
+                                        sub_df.temp_air.min()]])
 
     # Sort DataFrame according to air temperature
     temp_sorted_df = sub_df.sort_values('temp_air')
@@ -95,9 +96,11 @@ def shrink_weather_worst_month(weather_data):
     for month in weather_data.month.drop_duplicates():
         weather_month = weather_data[weather_data.month == month]
         total_ghi = weather_month.ghi.sum()
-        sum_irradiance = sum_irradiance.append({'month': month,
-                                                'ghi': total_ghi},
-                                               ignore_index=True)
+        sum_irradiance = pd.concat([sum_irradiance,
+                                    pd.DataFrame({'month': month,
+                                                  'ghi': total_ghi},
+                                                 index=[0])],
+                                   ignore_index=True)
     worst_month = sum_irradiance[sum_irradiance.ghi ==
                                  sum_irradiance.ghi.min()].month.iloc[0]
 
@@ -236,14 +239,13 @@ def subset_respecting_llp_direct(pv_database, pump_database,  # noqa: C901
                     pvps_fixture, llp_accepted,
                     M_s_min, M_s_max, M_p_min, M_p_max, **kwargs)
 
-            preselection = preselection.append(
-                pd.Series({
+            preselection = pd.concat([preselection, pd.DataFrame({
                         'pv_module': pvps_fixture.pvgeneration.pv_module.name,
                         'M_s': M_s,
                         'M_p': M_p,
                         'pump': pump.idname,
                         'llp': pvps_fixture.llp,
-                        'npv': pvps_fixture.npv}),
+                        'npv': pvps_fixture.npv}, index=[0])],
                 ignore_index=True)
 
     # Remove not satifying LLP
@@ -439,14 +441,13 @@ def subset_respecting_llp_mppt(pv_database, pump_database,    # noqa: C901
             M_s = size_nb_pv_mppt(pvps_fixture, llp_accepted, M_s_guess,
                                   **kwargs)
 
-            preselection = preselection.append(
-                pd.Series({
+            preselection = pd.concat([preselection, pd.DataFrame({
                     'pv_module': pvps_fixture.pvgeneration.pv_module.name,
                     'M_s': M_s,
                     'M_p': 1,
                     'pump': pump.idname,
                     'llp': pvps_fixture.llp,
-                    'npv': pvps_fixture.npv}),
+                    'npv': pvps_fixture.npv}, index=[0])],
                 ignore_index=True)
 
     # Remove not satifying LLP
