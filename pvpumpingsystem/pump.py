@@ -1435,8 +1435,8 @@ def _domain_P_H(specs, data_completeness):
 
         datapower_ar = np.array([power_min_tdhmin, power_min_tdhmax])
         datatdh_ar = np.array(
-            [float(specs[specs.power == power_min_tdhmin].tdh),
-             float(specs[specs.power == power_min_tdhmax].tdh)])
+            [float(specs[specs.power == power_min_tdhmin].tdh.iloc[0]),
+             float(specs[specs.power == power_min_tdhmax].tdh.iloc[0])])
         param_tdh, pcov_tdh = opt.curve_fit(funct_mod,
                                             datapower_ar, datatdh_ar)
         param_pow, pcov_pow = opt.curve_fit(funct_mod,
@@ -1501,7 +1501,7 @@ def _extrapolate_pow_eff_with_cst_efficiency(specs, efficiency_coeff=1):
     # keep the data where hydraulic power is the highest, and
     # assumes that this is the rated flowrate point
     rated_data = specs[hydrau_power == hydrau_power.max()]
-    rated_power = rated_data.voltage * rated_data.current
+    rated_power = rated_data.voltage.iloc[0] * rated_data.current.iloc[0]
     rated_efficiency = float(hydrau_power.max()/rated_power)
     # check consistency:
     if not 0 < rated_efficiency < 1:
