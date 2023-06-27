@@ -74,6 +74,7 @@ class PVPumpSystem(object):
         It is None until computed by run_model()
 
     """
+
     def __init__(self,
                  pvgeneration,
                  motorpump,
@@ -355,7 +356,8 @@ class PVPumpSystem(object):
         # set reservoir with enough water to fulfil the need of one morning
         elif starting_soc == 'morning':
             # Get water needed in the first morning (until 12am)
-            vol = float((self.consumption.flow_rate.iloc[0:12]*60).sum())
+            vol = float((self.consumption.flow_rate.iloc[0:12]*60)
+                        .sum().iloc[0])
             # initialization of water in reservoir
             self.reservoir.water_volume = vol
 
@@ -737,15 +739,15 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
             # consider losses
             power = iv_data.V*iv_data.I * modelchain.losses
             # type casting
-            power = float(power)
+            power = float(power.iloc[0])
             # compute flow
             res_dict = fctQwithPH(power, pipes.h_stat)
             Qlpm = res_dict['Q']
             P_unused = res_dict['P_unused']
 
             result.append({'Qlpm': Qlpm,
-                           'I': float(iv_data.I),
-                           'V': float(iv_data.V),
+                           'I': float(iv_data.I.iloc[0]),
+                           'V': float(iv_data.V.iloc[0]),
                            'P': power,
                            'P_unused': P_unused,
                            'tdh': pipes.h_stat
