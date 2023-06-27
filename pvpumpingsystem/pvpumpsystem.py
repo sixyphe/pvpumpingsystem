@@ -708,7 +708,7 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
                 # consider losses
                 power = iv_data.V*iv_data.I * modelchain.losses
                 # type casting
-                power = float(power)
+                power = float(power.iloc[0])
                 # compute flow
                 Qlpmnew = fctQwithPH(power, h_tot)['Q']
 
@@ -722,8 +722,8 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
             P_unused = fctQwithPH(power, h_tot)['P_unused']
 
             result.append({'Qlpm': Qlpmnew,
-                           'I': float(iv_data.I),
-                           'V': float(iv_data.V),
+                           'I': float(iv_data.I.iloc[0]),
+                           'V': float(iv_data.V.iloc[0]),
                            'P': power,
                            'P_unused': P_unused,
                            'tdh': h_tot
