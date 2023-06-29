@@ -178,6 +178,11 @@ class PVGeneration:
         # Import of weather
         self.weather_data_and_metadata = weather_data_and_metadata
 
+        # Emulation of the old pvlib modelchain "orientation_strategy"
+        if orientation_strategy:
+            surface_tilt, surface_azimuth = pvlib.modelchain.get_orientation(
+                orientation_strategy, latitude=self.location.latitude)
+
         # Definition of PV generator
         self.system = pvlib.pvsystem.PVSystem(
                     surface_tilt=surface_tilt,
@@ -201,7 +206,8 @@ class PVGeneration:
         self.modelchain = pvlib.modelchain.ModelChain(
                     system=self.system,
                     location=self.location,
-                    orientation_strategy=orientation_strategy,
+                    # removed in pvlib 0.9.0
+                    # orientation_strategy=orientation_strategy,
                     clearsky_model=clearsky_model,
                     transposition_model=transposition_model,
                     solar_position_method=solar_position_method,
@@ -242,8 +248,14 @@ class PVGeneration:
         if hasattr(self, 'modelchain'):  # adapt modelchain to new data
             self.modelchain.location = self.location
             # activates the setting of array tilt according to location:
-            self.modelchain.orientation_strategy = \
-                self.modelchain.orientation_strategy
+            # removed in pvlib 0.9.0
+            # self.modelchain.orientation_strategy = \
+            #     self.modelchain.orientation_strategy
+            if self.orientation_strategy:
+                self.system.surface_tilt, self.system.surface_azimuth = \
+                    pvlib.modelchain.get_orientation(
+                        self.orientation_strategy,
+                        latitude=self.location.latitude)
 
     @property  # getter
     def pv_module_name(self):
