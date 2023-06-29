@@ -172,7 +172,7 @@ class PVPumpSystem(object):
         -------------
         Takes ~10sec to compute 8760 iterations
         """
-        params = self.pvgeneration.modelchain.diode_params[0:stop]
+        params = self.pvgeneration.modelchain.results.diode_params[0:stop]
         M_s = self.pvgeneration.system.modules_per_string
         M_p = self.pvgeneration.system.strings_per_inverter
 
@@ -188,7 +188,7 @@ class PVPumpSystem(object):
                 load_fctIfromVH=load_fctI,
                 load_interval_V=intervalsVH['V'](tdh),
                 pv_interval_V=[
-                    0, self.pvgeneration.modelchain.dc.v_oc.max() * M_s],
+                    0, self.pvgeneration.modelchain.results.dc.v_oc.max() * M_s],
                 tdh=tdh)
 
         if plot:
@@ -325,7 +325,7 @@ class PVPumpSystem(object):
 
         self.efficiency = calc_efficiency(
             self.flow,
-            self.pvgeneration.modelchain.effective_irradiance,
+            self.pvgeneration.modelchain.results.effective_irradiance,
             pv_area)
 
     def calc_reservoir(self, starting_soc='morning'):
@@ -529,7 +529,7 @@ def operating_point(  # noqa: C901
     ----------
     params: pandas.Dataframe
         Dataframe containing the 5 diode parameters. Typically comes from
-        PVGeneration.ModelChain.diode_params
+        PVGeneration.ModelChain.results.diode_params
 
     modules_per_string: numeric
         Number of modules in series in a string
@@ -677,7 +677,7 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
     fctQwithPH, sigma2 = motorpump.functQforPH()
 
     for i, row in tqdm.tqdm(enumerate(
-            modelchain.diode_params[0:stop].iterrows()),
+            modelchain.results.diode_params[0:stop].iterrows()),
                                       desc='Computing of Q',
                                       total=stop,
                                       **kwargs):
@@ -703,10 +703,10 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
                         params, M_s, M_p,
                         load_fctIfromVH=load_fctIfromVH,
                         load_interval_V=intervalsVH['V'](h_tot),
-                        pv_interval_V=[0, modelchain.dc.v_oc[i] * M_s],
+                        pv_interval_V=[0, modelchain.results.dc.v_oc[i] * M_s],
                         tdh=h_tot)
                 # consider losses
-                power = iv_data.V*iv_data.I * modelchain.losses
+                power = iv_data.V*iv_data.I * modelchain.results.losses
                 # type casting
                 power = float(power.iloc[0])
                 # compute flow
@@ -734,10 +734,10 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
                     params, M_s, M_p,
                     load_fctIfromVH=load_fctIfromVH,
                     load_interval_V=intervalsVH['V'](pipes.h_stat),
-                    pv_interval_V=[0, modelchain.dc.v_oc[i] * M_s],
+                    pv_interval_V=[0, modelchain.results.dc.v_oc[i] * M_s],
                     tdh=pipes.h_stat)
             # consider losses
-            power = iv_data.V*iv_data.I * modelchain.losses
+            power = iv_data.V*iv_data.I * modelchain.results.losses
             # type casting
             power = float(power.iloc[0])
             # compute flow
@@ -754,7 +754,7 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
                            })
 
     pdresult = pd.DataFrame(result)
-    pdresult.index = modelchain.diode_params[0:stop].index
+    pdresult.index = modelchain.results.diode_params[0:stop].index
     return pdresult
 
 
@@ -811,10 +811,11 @@ def calc_flow_mppt_coupled(pvgeneration, motorpump, pipes, mppt,
     result = []
     modelchain = pvgeneration.modelchain
     if mppt is None:
-        # note that dc already includes losses from modelchain.losses_model
-        power_available = modelchain.dc.p_mp[0:stop]
+        # note that dc already includes losses
+        # from modelchain.results.losses_model
+        power_available = modelchain.results.dc.p_mp[0:stop]
     else:
-        power_available = modelchain.dc.p_mp[0:stop] * mppt.efficiency
+        power_available = modelchain.results.dc.p_mp[0:stop] * mppt.efficiency
 
     fctQwithPH, sigma2 = motorpump.functQforPH()
 
@@ -868,7 +869,7 @@ def calc_flow_mppt_coupled(pvgeneration, motorpump, pipes, mppt,
                            })
 
     pdresult = pd.DataFrame(result)
-    pdresult.index = modelchain.diode_params[0:stop].index
+    pdresult.index = modelchain.results.diode_params[0:stop].index
     return pdresult
 
 
