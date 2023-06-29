@@ -182,6 +182,9 @@ class PVGeneration:
         if orientation_strategy:
             surface_tilt, surface_azimuth = pvlib.modelchain.get_orientation(
                 orientation_strategy, latitude=self.location.latitude)
+            if (self.location.latitude < 0):
+                surface_tilt = abs(surface_tilt)
+                surface_azimuth = 0
 
         # Definition of PV generator
         self.system = pvlib.pvsystem.PVSystem(
@@ -256,6 +259,9 @@ class PVGeneration:
                     pvlib.modelchain.get_orientation(
                         self.orientation_strategy,
                         latitude=self.location.latitude)
+                if (self.location.latitude < 0):
+                    self.system.surface_tilt = abs(self.system.surface_tilt)
+                    self.system.surface_azimuth = 0
 
     @property  # getter
     def pv_module_name(self):
