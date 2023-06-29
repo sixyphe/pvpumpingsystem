@@ -111,8 +111,8 @@ class Pump:
             if motor_electrical_architecture is not None:
                 print("Motor architecture in file (",
                       self.motor_electrical_architecture, ") is replaced by ",
-                      "price provided (", motor_electrical_architecture, ")",
-                      sep='')
+                      "architecture provided (", motor_electrical_architecture,
+                      ")", sep='')
                 self.motor_electrical_architecture = \
                     motor_electrical_architecture
         except KeyError:
