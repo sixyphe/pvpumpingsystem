@@ -90,18 +90,16 @@ class Pump:
         try:
             self.price = float(metadata['price'])
             if not np.isnan(price):
-                print("Pump price in file (", self.price, "$) is replaced by ",
-                      "price provided (", price, "$)", sep='')
                 self.price = price
+                warnings.warn('price attribute overwritten.')
         except KeyError:
             self.price = price
         # retrieve name, or overwrite it if given in __init__
         try:
             self.idname = metadata['pump name']
             if idname is not None:
-                print("Pump name in file (", self.idname, ") is replaced by ",
-                      "name provided (", idname, ")", sep='')
                 self.idname = idname
+                warnings.warn('idname attribute overwritten.')
         except KeyError:
             self.idname = idname
         # retrieve motor_architecture, or overwrite it if given in __init__
@@ -109,12 +107,10 @@ class Pump:
             self.motor_electrical_architecture = \
                 metadata['electrical architecture']
             if motor_electrical_architecture is not None:
-                print("Motor architecture in file (",
-                      self.motor_electrical_architecture, ") is replaced by ",
-                      "architecture provided (", motor_electrical_architecture,
-                      ")", sep='')
                 self.motor_electrical_architecture = \
                     motor_electrical_architecture
+                warnings.warn('motor_electrical_architecture '
+                              'attribute overwritten.')
         except KeyError:
             self.motor_electrical_architecture = \
                 motor_electrical_architecture
