@@ -18,6 +18,10 @@ import pvpumpingsystem.reservoir as rv
 import pvpumpingsystem.consumption as cs
 import pvpumpingsystem.pvpumpsystem as pvps
 
+# suppress warnings
+# import warnings
+# warnings.filterwarnings("ignore")
+
 # allows pandas to convert timestamp for matplotlib
 # import pandas as pd
 # pd.plotting.register_matplotlib_converters()
@@ -29,8 +33,9 @@ import pvpumpingsystem.pvpumpsystem as pvps
 
 # Import a weather file built by PVGIS according to latitude and longitude
 data, _, _, metadata = pvlib.iotools.get_pvgis_tmy(
-    lat=36,  # latitude of selected location
-    lon=10,  # longitude of selected location
+    map_variables=True,  # new requirement in pvlib
+    latitude=36,  # latitude of selected location
+    longitude=10,  # longitude of selected location
     outputformat='epw')  # output format of file
 
 # coerce the weather file to one single year to avoid bug with consumption file
