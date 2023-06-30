@@ -149,7 +149,7 @@ class PVGeneration:
                  racking_model='open_rack',
                  losses_parameters=None,
                  surface_type=None,
-                 module_type='glass_polymer',
+                 module_type='open_rack_glass_polymer',
                  # PV module glazing parameters (not always given in specs)
                  glass_params={'K': 4,  # extinction coefficient[1/m]
                                'L': 0.002,  # thickness [m]
@@ -167,6 +167,10 @@ class PVGeneration:
                  aoi_model='physical',
                  spectral_model='no_loss',
                  temperature_model='sapm',
+                 temperature_model_parameters=(pvlib.temperature.
+                                               TEMPERATURE_MODEL_PARAMETERS
+                                               ['sapm']
+                                               ['open_rack_glass_polymer']),
                  losses_model='pvwatts',
                  **kwargs
                  ):
@@ -186,7 +190,7 @@ class PVGeneration:
                 surface_tilt = abs(surface_tilt)
                 surface_azimuth = 0
 
-# Definition of PV array (introduced because of changes in pvlib)
+        # Definition of PV array (introduced because of changes in pvlib)
         self.array = pvlib.pvsystem.Array(
                     mount=pvlib.pvsystem.FixedMount(
                         surface_tilt, surface_azimuth),
@@ -199,11 +203,11 @@ class PVGeneration:
                     modules_per_string=modules_per_string,
                     strings=strings_in_parallel,
                     array_losses_parameters=losses_parameters,
-                    temperature_model_parameters=dict(a=-3.56, b=-0.075, deltaT=3), # PAT: FAKE DATA
+                    temperature_model_parameters=temperature_model_parameters,
                     name=None
                     )
 
-# Definition of PV generator
+        # Definition of PV generator
         self.system = pvlib.pvsystem.PVSystem(
                     arrays=[self.array],
                     # surface_tilt=surface_tilt,
@@ -273,13 +277,13 @@ class PVGeneration:
             # self.modelchain.orientation_strategy = \
             #     self.modelchain.orientation_strategy
             if self.orientation_strategy:
-                self.system.surface_tilt, self.system.surface_azimuth = \
+                self.array.surface_tilt, self.system.surface_azimuth = \
                     pvlib.modelchain.get_orientation(
                         self.orientation_strategy,
                         latitude=self.location.latitude)
                 if (self.location.latitude < 0):
-                    self.system.surface_tilt = abs(self.system.surface_tilt)
-                    self.system.surface_azimuth = 0
+                    self.array.surface_tilt = abs(self.array.surface_tilt)
+                    self.array.surface_azimuth = 0
 
     @property  # getter
     def pv_module_name(self):
@@ -305,11 +309,11 @@ class PVGeneration:
         # convert in pandas.Series by selecting first column: iloc[:, 0]
         self.pv_module = pv_database[pv_idname].iloc[:, 0]  # to remove
         if hasattr(self, 'system'):
-            # update system.module
-            self.system.module = pv_database[pv_idname].iloc[:, 0]
-            # update system.module_parameters:
+            # update array.module
+            self.array.module = pv_database[pv_idname].iloc[:, 0]
+            # update array.module_parameters:
             for key in dict(self.pv_module):
-                self.system.module_parameters[key] = dict(self.pv_module)[key]
+                self.array.module_parameters[key] = dict(self.pv_module)[key]
 
         self.price_per_module = self.price_per_watt * self.pv_module.STC
 
