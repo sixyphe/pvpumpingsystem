@@ -186,10 +186,10 @@ class PVGeneration:
                 surface_tilt = abs(surface_tilt)
                 surface_azimuth = 0
 
-        # Definition of PV generator
-        self.system = pvlib.pvsystem.PVSystem(
-                    surface_tilt=surface_tilt,
-                    surface_azimuth=surface_azimuth,
+# Definition of PV array (introduced because of changes in pvlib)
+        self.array = pvlib.pvsystem.Array(
+                    mount=pvlib.pvsystem.FixedMount(
+                        surface_tilt, surface_azimuth),
                     albedo=albedo,
                     surface_type=surface_type,
                     module=self.pv_module,
@@ -197,12 +197,30 @@ class PVGeneration:
                                        **glass_params},
                     module_type=module_type,
                     modules_per_string=modules_per_string,
-                    strings_per_inverter=strings_in_parallel,
+                    strings=strings_in_parallel,
+                    array_losses_parameters=losses_parameters,
+                    temperature_model_parameters=dict(a=-3.56, b=-0.075, deltaT=3), # PAT: FAKE DATA
+                    name=None
+                    )
+
+# Definition of PV generator
+        self.system = pvlib.pvsystem.PVSystem(
+                    arrays=[self.array],
+                    # surface_tilt=surface_tilt,
+                    # surface_azimuth=surface_azimuth,
+                    # albedo=albedo,
+                    # surface_type=surface_type,
+                    # module=self.pv_module,
+                    # module_parameters={**dict(self.pv_module),
+                    #                    **glass_params},
+                    # module_type=module_type,
+                    # modules_per_string=modules_per_string,
+                    # strings_per_inverter=strings_in_parallel,
                     inverter=None,  # fixed as AC pumps are not considered yet
                     inverter_parameters={'pdc0': 700},  # fixed (cf above)
-                    racking_model=racking_model,
-                    losses_parameters=losses_parameters,
-                    name=None  # fixed (overwritten in PVGeneration object)
+                    # racking_model=racking_model,
+                    # losses_parameters=losses_parameters,
+                    # name=None  # fixed (overwritten in PVGeneration object)
                     )
 
         # Choices of models to use
@@ -227,8 +245,8 @@ class PVGeneration:
         text = "PV generator made of: " + \
                  "\npv module: " + str(self.pv_module.name) + \
                  "\nnumber of modules: " + \
-                 str(self.system.modules_per_string *
-                     self.system.strings_per_inverter) + \
+                 str(self.array.modules_per_string *
+                     self.array.strings) + \
                  "\nin: " + str(self.location)
         return text
 
