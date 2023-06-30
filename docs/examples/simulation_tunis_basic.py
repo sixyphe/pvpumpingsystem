@@ -82,7 +82,7 @@ if pvps1.coupling == 'direct':
 # effective irradiance on PV array
 plt.figure()
 plt.plot(pvps1.efficiency.index[24:47].hour,
-         pvps1.pvgeneration.modelchain.effective_irradiance[24:47])
+         pvps1.pvgeneration.modelchain.results.effective_irradiance[24:47])
 plt.xlabel('Hour')
 plt.title('Effective irradiance vs time')
 plt.xlim([-1, 23])
