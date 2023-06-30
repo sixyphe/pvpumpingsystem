@@ -173,8 +173,8 @@ class PVPumpSystem(object):
         Takes ~10sec to compute 8760 iterations
         """
         params = self.pvgeneration.modelchain.results.diode_params[0:stop]
-        M_s = self.pvgeneration.system.modules_per_string
-        M_p = self.pvgeneration.system.strings_per_inverter
+        M_s = self.pvgeneration.array.modules_per_string
+        M_p = self.pvgeneration.array.strings
 
         load_fctI, intervalsVH = self.motorpump.functIforVH()
 
@@ -187,15 +187,15 @@ class PVPumpSystem(object):
                 M_s, M_p,
                 load_fctIfromVH=load_fctI,
                 load_interval_V=intervalsVH['V'](tdh),
-                pv_interval_V=[
-                    0, self.pvgeneration.modelchain.results.dc.v_oc.max() * M_s],
+                pv_interval_V=[0,
+                    self.pvgeneration.modelchain.results.dc.v_oc.max() * M_s],
                 tdh=tdh)
 
         if plot:
             plt.figure()
             # domain of interest on V
             # (*1.1 is for the case when conditions are better than stc)
-            v_high_boundary = self.pvgeneration.system.module.V_oc_ref * \
+            v_high_boundary = self.pvgeneration.array.module.V_oc_ref * \
                 M_s*1.1
             Vrange_pv = np.arange(0, v_high_boundary)
 
@@ -315,9 +315,9 @@ class PVPumpSystem(object):
 
         """
 
-        module_area = self.pvgeneration.system.module.A_c
-        M_s = self.pvgeneration.system.modules_per_string
-        M_p = self.pvgeneration.system.strings_per_inverter
+        module_area = self.pvgeneration.array.module.A_c
+        M_s = self.pvgeneration.array.modules_per_string
+        M_p = self.pvgeneration.array.strings
         pv_area = module_area * M_s * M_p
 
         if self.flow is None:
@@ -517,7 +517,7 @@ def function_i_from_v(V, I_L, I_o, R_s, R_sh, nNsVth,
 def operating_point(  # noqa: C901
         params,
         modules_per_string,
-        strings_per_inverter,
+        strings,
         load_fctIfromVH=None,
         load_interval_V=[-np.inf, np.inf],
         pv_interval_V=[-np.inf, np.inf],
@@ -534,7 +534,7 @@ def operating_point(  # noqa: C901
     modules_per_string: numeric
         Number of modules in series in a string
 
-    strings_per_inverter: numeric
+    strings: numeric
         Number of strings in parallel
 
     load_fctIfromVH: function
@@ -569,7 +569,7 @@ def operating_point(  # noqa: C901
         nNsVth = params_row.nNsVth
 
         M_s = modules_per_string
-        M_p = strings_per_inverter
+        M_p = strings
 
         if (M_s, M_p) != (1, 1):
             I_L = M_p * I_L
@@ -670,8 +670,8 @@ def calc_flow_directly_coupled(pvgeneration, motorpump, pipes,
     result = []
     modelchain = pvgeneration.modelchain
     # retrieve specific functions of motorpump V(I,H) and Q(V,H)
-    M_s = modelchain.system.modules_per_string
-    M_p = modelchain.system.strings_per_inverter
+    M_s = pvgeneration.array.modules_per_string
+    M_p = pvgeneration.array.strings
 
     load_fctIfromVH, intervalsVH = motorpump.functIforVH()
     fctQwithPH, sigma2 = motorpump.functQforPH()
