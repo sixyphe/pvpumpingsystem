@@ -208,10 +208,10 @@ class PVPumpSystem(object):
                 nNsVth = nNsVth * M_s
                 Rs = (M_s/M_p) * Rs
                 Rsh = (M_s/M_p) * Rsh
-            Ivect_pv_good = self.pvgeneration.system.i_from_v(Rsh, Rs,
-                                                              nNsVth,
-                                                              Vrange_pv,
-                                                              I0, IL)
+            Ivect_pv_good = self.pvgeneration.system.i_from_v(Vrange_pv,
+                                                              IL, I0,
+                                                              Rs, Rsh,
+                                                              nNsVth)
             plt.plot(Vrange_pv, Ivect_pv_good,
                      label='pv array with S = 1000 W and Tcell = 25°C')
 
@@ -224,10 +224,10 @@ class PVPumpSystem(object):
                 nNsVth = nNsVth * M_s
                 Rs = (M_s/M_p) * Rs
                 Rsh = (M_s/M_p) * Rsh
-            Ivect_pv_poor = self.pvgeneration.system.i_from_v(Rsh, Rs,
-                                                              nNsVth,
-                                                              Vrange_pv,
-                                                              I0, IL)
+            Ivect_pv_poor = self.pvgeneration.system.i_from_v(Vrange_pv,
+                                                              IL, I0,
+                                                              Rs, Rsh,
+                                                              nNsVth)
             plt.plot(Vrange_pv, Ivect_pv_poor,
                      label='pv array with S = 100 W and Tcell = 60°C')
 
@@ -584,8 +584,8 @@ def operating_point(  # noqa: C901
         else:
             # attempt to use only load_fctI here
             def pv_fctI(V):  # does not work
-                return pvlib.pvsystem.i_from_v(R_sh, R_s, nNsVth, V,
-                                               I_o, I_L, method='lambertw')
+                return pvlib.pvsystem.i_from_v(V, I_L, I_o, R_s, R_sh, nNsVth,
+                                               method='lambertw')
 
             def load_fctI(V):
                 return load_fctIfromVH(V, tdh, error_raising=False)
